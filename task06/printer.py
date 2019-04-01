@@ -4,11 +4,12 @@ from model import *
 class PrettyPrinter(ASTNodeVisitor):
     def __init__(self, depth, is_command):
         self.tabs = ' ' * 4 * depth if is_command else ''
-        self.end = ';\n' if is_command else ''
+        self.end_with_semicolon = ';\n' if is_command else ''
+        self.end = '\n' if is_command else ''
         self.depth = depth
 
     def visit_Number(self, number):
-        return self.tabs + str(number.value) + self.end
+        return self.tabs + str(number.value) + self.end_with_semicolon
 
     def visit_FunctionDefinition(self, function_definition):
         program = self.tabs + 'def ' + function_definition.name + '(' + \
@@ -48,10 +49,10 @@ class PrettyPrinter(ASTNodeVisitor):
     def visit_Print(self, print_):
         return self.tabs + 'print ' + \
                print_.expr.accept(PrettyPrinter(self.depth, False)) + \
-               self.end
+               self.end_with_semicolon
 
     def visit_Read(self, read):
-        return self.tabs + 'read ' + read.name + self.end
+        return self.tabs + 'read ' + read.name + self.end_with_semicolon
 
     def visit_FunctionCall(self, function_call):
         return self.tabs + \
@@ -67,10 +68,10 @@ class PrettyPrinter(ASTNodeVisitor):
                                    False
                                )
                            ) for arg in function_call.args]) + \
-                ')' + self.end
+                ')' + self.end_with_semicolon
 
     def visit_Reference(self, reference):
-        return self.tabs + reference.name + self.end
+        return self.tabs + reference.name + self.end_with_semicolon
 
     def visit_BinaryOperation(self, binary_operation):
         return self.tabs + '(' + \
@@ -85,7 +86,7 @@ class PrettyPrinter(ASTNodeVisitor):
                        self.depth,
                        False
                    )
-               ) + ')' + self.end
+               ) + ')' + self.end_with_semicolon
 
     def visit_UnaryOperation(self, unary_operation):
         return self.tabs + unary_operation.op + '(' + \
@@ -95,7 +96,7 @@ class PrettyPrinter(ASTNodeVisitor):
                        False
                    )
                ) + \
-               ')' + self.end
+               ')' + self.end_with_semicolon
 
 
 def pretty_print(node):

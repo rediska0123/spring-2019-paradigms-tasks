@@ -7,14 +7,14 @@ from printer import *
 def test_Conditional():
     program = Conditional(Number(42), [], [])
     pretty_print_program = program.accept(PrettyPrinter(0, True))
-    answer = 'if (42) {\n};\n'
+    answer = 'if (42) {\n}\n'
     assert pretty_print_program == answer
 
 
 def test_FunctionDefinition():
     program = FunctionDefinition("foo", Function([], []))
     pretty_print_program = program.accept(PrettyPrinter(0, True))
-    answer = 'def foo() {\n};\n'
+    answer = 'def foo() {\n}\n'
     assert pretty_print_program == answer
 
 
@@ -83,11 +83,11 @@ def test_end_to_end(capsys):
     print x;
     if ((2) == (3)) {
         if (1) {
-        };
+        }
     } else {
         exit(-(arg1));
-    };
-};
+    }
+}
 '''
     assert out == answer
 
