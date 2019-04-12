@@ -3,40 +3,40 @@ from model import *
 
 class PrettyPrinter(ASTNodeVisitor):
     def __init__(self, depth, is_command):
-        self.tabs = ' ' * 4 * depth if is_command else ''
+        self.tabs = '\t' * depth if is_command else ''
         self.end_with_semicolon = ';\n' if is_command else ''
         self.end = '\n' if is_command else ''
         self.depth = depth
 
-    def visit_Number(self, number):
-        return self.tabs + str(number.value) + self.end_with_semicolon
+    def visit_number(self, node):
+        return self.tabs + str(node.value) + self.end_with_semicolon
 
-    def visit_FunctionDefinition(self, function_definition):
-        program = self.tabs + 'def ' + function_definition.name + '(' + \
-                  ', '.join(function_definition.function.args) + ') {\n'
-        for command in function_definition.function.body:
+    def visit_functionDefinition(self, node):
+        program = self.tabs + 'def ' + node.name + '(' + \
+                  ', '.join(node.function.args) + ') {\n'
+        for command in node.function.body:
             program += command.accept(PrettyPrinter(self.depth + 1, True))
         program += self.tabs + '}' + self.end
         return program
 
-    def visit_Conditional(self, conditional):
+    def visit_conditional(self, node):
         program = self.tabs + 'if (' + \
-                  conditional.condition.accept(
+                  node.condition.accept(
                       PrettyPrinter(
                           self.depth,
                           False
                       )
                   ) + ') {\n'
-        for if_true_command in conditional.if_true:
+        for if_true_command in node.if_true:
             program += if_true_command.accept(
                            PrettyPrinter(
                                self.depth + 1,
                                True
                            )
                        )
-        if (conditional.if_false):
+        if node.if_false:
             program += self.tabs + '} else {\n'
-            for if_false_command in conditional.if_false:
+            for if_false_command in node.if_false:
                 program += if_false_command.accept(
                                PrettyPrinter(
                                    self.depth + 1,
@@ -46,17 +46,17 @@ class PrettyPrinter(ASTNodeVisitor):
         program += self.tabs + '}' + self.end
         return program
 
-    def visit_Print(self, print_):
+    def visit_print(self, node):
         return self.tabs + 'print ' + \
-               print_.expr.accept(PrettyPrinter(self.depth, False)) + \
+               node.expr.accept(PrettyPrinter(self.depth, False)) + \
                self.end_with_semicolon
 
-    def visit_Read(self, read):
-        return self.tabs + 'read ' + read.name + self.end_with_semicolon
+    def visit_read(self, node):
+        return self.tabs + 'read ' + node.name + self.end_with_semicolon
 
-    def visit_FunctionCall(self, function_call):
+    def visit_functionCall(self, node):
         return self.tabs + \
-                function_call.fun_expr.accept(
+                node.fun_expr.accept(
                     PrettyPrinter(
                         self.depth,
                         False
@@ -67,30 +67,30 @@ class PrettyPrinter(ASTNodeVisitor):
                                    self.depth,
                                    False
                                )
-                           ) for arg in function_call.args]) + \
+                           ) for arg in node.args]) + \
                 ')' + self.end_with_semicolon
 
-    def visit_Reference(self, reference):
-        return self.tabs + reference.name + self.end_with_semicolon
+    def visit_reference(self, node):
+        return self.tabs + node.name + self.end_with_semicolon
 
-    def visit_BinaryOperation(self, binary_operation):
+    def visit_binaryOperation(self, node):
         return self.tabs + '(' + \
-               binary_operation.lhs.accept(
+               node.lhs.accept(
                    PrettyPrinter(
                        self.depth,
                        False
                    )
-               ) + ') ' + binary_operation.op + ' (' + \
-               binary_operation.rhs.accept(
+               ) + ') ' + node.op + ' (' + \
+               node.rhs.accept(
                    PrettyPrinter(
                        self.depth,
                        False
                    )
                ) + ')' + self.end_with_semicolon
 
-    def visit_UnaryOperation(self, unary_operation):
-        return self.tabs + unary_operation.op + '(' + \
-               unary_operation.expr.accept(
+    def visit_unaryOperation(self, node):
+        return self.tabs + node.op + '(' + \
+               node.expr.accept(
                    PrettyPrinter(
                        self.depth,
                        False

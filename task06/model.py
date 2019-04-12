@@ -29,34 +29,34 @@ class ASTNode(metaclass=abc.ABCMeta):
 
 class ASTNodeVisitor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def visit_Number(self, number):
+    def visit_number(self, node):
         pass
 
-    def visit_Function(self, function):
+    def visit_function(self, node):
         pass
 
-    def visit_FunctionDefinition(self, function_definition):
+    def visit_functionDefinition(self, node):
         pass
 
-    def visit_Conditional(self, conditional):
+    def visit_conditional(self, node):
         pass
 
-    def visit_Print(self, print_):
+    def visit_print(self, node):
         pass
 
-    def visit_Read(self, read):
+    def visit_read(self, node):
         pass
 
-    def visit_FunctionCall(self, function_call):
+    def visit_functionCall(self, node):
         pass
 
-    def visit_Reference(self, reference):
+    def visit_reference(self, node):
         pass
 
-    def visit_BinaryOperation(delf, binary_operation):
+    def visit_binaryOperation(delf, node):
         pass
 
-    def visit_UnaryOperation(delf, unary_operation):
+    def visit_unaryOperation(delf, node):
         pass
 
 
@@ -69,7 +69,7 @@ class Number(ASTNode):
             self.value = 1 if value else 0
 
     def accept(self, visitor):
-        return visitor.visit_Number(self)
+        return visitor.visit_number(self)
 
     def evaluate(self, scope):
         return self
@@ -92,7 +92,7 @@ class Function(ASTNode):
         self.body = body
 
     def accept(self, visitor):
-        return visitor.visit_Function(self)
+        return visitor.visit_function(self)
 
     def evaluate(self, scope):
         return self
@@ -105,7 +105,7 @@ class FunctionDefinition(ASTNode):
         self.function = function
 
     def accept(self, visitor):
-        return visitor.visit_FunctionDefinition(self)
+        return visitor.visit_functionDefinition(self)
 
     def evaluate(self, scope):
         scope[self.name] = self.function
@@ -120,15 +120,14 @@ class Conditional(ASTNode):
         self.if_false = if_false
 
     def accept(self, visitor):
-        return visitor.visit_Conditional(self)
+        return visitor.visit_conditional(self)
 
     def evaluate(self, scope):
         condition_result = self.condition.evaluate(scope)
         commands = self.if_true if bool(condition_result) else self.if_false
         res = Number(0)
-        if commands:
-            for command in commands:
-                res = command.evaluate(scope)
+        for command in commands or []:
+            res = command.evaluate(scope)
         return res
 
 
@@ -138,7 +137,7 @@ class Print(ASTNode):
         self.expr = expr
 
     def accept(self, visitor):
-        return visitor.visit_Print(self)
+        return visitor.visit_print(self)
 
     def evaluate(self, scope):
         result = self.expr.evaluate(scope)
@@ -152,7 +151,7 @@ class Read(ASTNode):
         self.name = name
 
     def accept(self, visitor):
-        return visitor.visit_Read(self)
+        return visitor.visit_read(self)
 
     def evaluate(self, scope):
         val = int(input())
@@ -167,7 +166,7 @@ class FunctionCall(ASTNode):
         self.args = args
 
     def accept(self, visitor):
-        return visitor.visit_FunctionCall(self)
+        return visitor.visit_functionCall(self)
 
     def evaluate(self, scope):
         function = self.fun_expr.evaluate(scope)
@@ -175,13 +174,12 @@ class FunctionCall(ASTNode):
         for arg in self.args:
             evaluated_args.append(arg.evaluate(scope))
         call_scope = Scope(scope)
-        for i in range(len(function.args)):
-            call_scope[function.args[i]] = evaluated_args[i]
+        for (i, arg) in enumerate(function.args):
+            call_scope[arg] = evaluated_args[i]
 
         res = Number(0)
-        if function.body:
-            for command in function.body:
-                res = command.evaluate(call_scope)
+        for command in function.body or []:
+            res = command.evaluate(call_scope)
         return res
 
 
@@ -191,7 +189,7 @@ class Reference(ASTNode):
         self.name = name
 
     def accept(self, visitor):
-        return visitor.visit_Reference(self)
+        return visitor.visit_reference(self)
 
     def evaluate(self, scope):
         return scope[self.name]
@@ -216,12 +214,12 @@ class BinaryOperation(ASTNode):
             '>': lambda x, y: x > y,
             '<=': lambda x, y: x <= y,
             '>=': lambda x, y: x >= y,
-            '&&': lambda x, y: bool(x) and bool(y),
-            '||': lambda x, y: bool(x) or bool(y)
+            '&&': lambda x, y: x and y,
+            '||': lambda x, y: x or y
         }
 
     def accept(self, visitor):
-        return visitor.visit_BinaryOperation(self)
+        return visitor.visit_binaryOperation(self)
 
     def evaluate(self, scope):
         lres = self.lhs.evaluate(scope).value
@@ -240,7 +238,7 @@ class UnaryOperation(ASTNode):
         }
 
     def accept(self, visitor):
-        return visitor.visit_UnaryOperation(self)
+        return visitor.visit_unaryOperation(self)
 
     def evaluate(self, scope):
         expr_res = self.expr.evaluate(scope).value

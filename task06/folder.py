@@ -1,78 +1,80 @@
 from model import *
 
 
-def simplify(args):
-    return [arg.accept(ConstantFolder()) for arg in args]
+def simplify(constantFolder, args):
+    return [arg.accept(constantFolder) for arg in args] if args else []
 
 
 class ConstantFolder(ASTNodeVisitor):
 
-    def visit_Number(self, number):
-        return number
+    def visit_number(self, node):
+        return node
 
-    def visit_Function(self, function):
-        args = function.args
-        body = function.body
-        return Function(args, simplify(body))
+    def visit_function(self, node):
+        args = node.args
+        body = node.body
+        return Function(args, simplify(self, body))
 
-    def visit_FunctionDefinition(self, function_definition):
-        name = function_definition.name
-        function = function_definition.function
-        return FunctionDefinition(name, function.accept(ConstantFolder()))
+    def visit_functionDefinition(self, node):
+        name = node.name
+        function = node.function
+        return FunctionDefinition(name, function.accept(self))
 
-    def visit_Conditional(self, conditional):
-        condition = conditional.condition
-        if_true, if_false = conditional.if_true, conditional.if_false
+    def visit_conditional(self, node):
+        condition = node.condition
+        if_true, if_false = node.if_true, node.if_false
         return Conditional(
-            condition.accept(ConstantFolder()),
-            simplify(if_true),
-            simplify(if_false)
+            condition.accept(self),
+            simplify(self, if_true),
+            simplify(self, if_false)
         )
 
-    def visit_Print(self, print_):
-        return Print(print_.expr.accept(ConstantFolder()))
+    def visit_print(self, node):
+        return Print(node.expr.accept(self))
 
-    def visit_Read(self, read):
-        return read
+    def visit_read(self, node):
+        return node
 
-    def visit_FunctionCall(self, function_call):
-        return FunctionCall(function_call.func_expr, simplify(args))
+    def visit_functionCall(self, node):
+        return FunctionCall(node.func_expr, simplify(node.args))
 
-    def visit_Reference(self, reference):
-        return reference
+    def visit_reference(self, node):
+        return node
 
-    def visit_BinaryOperation(self, binary_operation):
-        lhs, rhs = binary_operation.lhs, binary_operation.rhs
-        simplified_lhs = lhs.accept(ConstantFolder())
-        simplified_rhs = rhs.accept(ConstantFolder())
+    def visit_binaryOperation(self, node):
+        lhs, rhs = node.lhs, node.rhs
+        simplified_lhs = lhs.accept(self)
+        simplified_rhs = rhs.accept(self)
         simplified_binary_operation = BinaryOperation(
             simplified_lhs,
-            binary_operation.op,
+            node.op,
             simplified_rhs
         )
         if (isinstance(simplified_lhs, Number) and
                 isinstance(simplified_rhs, Number)):
             return simplified_binary_operation.evaluate(Scope())
-        if (isinstance(simplified_lhs, Number) and
+        elif (isinstance(simplified_lhs, Number) and
                 not bool(simplified_lhs) and
-                isinstance(simplified_rhs, Reference)):
+                isinstance(simplified_rhs, Reference) and
+                node.op == '*'):
             return Number(0)
-        if (isinstance(simplified_rhs, Number) and
+        elif (isinstance(simplified_rhs, Number) and
                 not bool(simplified_rhs) and
-                isinstance(simplified_lhs, Reference)):
+                isinstance(simplified_lhs, Reference) and
+                node.op == '*'):
             return Number(0)
-        if (isinstance(simplified_lhs, Reference) and
-                isinstance(rhs, Reference) and
+        elif (isinstance(simplified_lhs, Reference) and
+                isinstance(simplified_rhs, Reference) and
                 simplified_lhs.name == simplified_rhs.name and
-                binary_operation.op == '-'):
+                node.op == '-'):
             return Number(0)
         return simplified_binary_operation
 
-    def visit_UnaryOperation(self, unary_operation):
-        expr = unary_operation.expr
-        simplified_expr = expr.accept(ConstantFolder())
+    def visit_unaryOperation(self, node):
+        expr = node.expr
+        simplified_expr = expr.accept(self)
         simplified_unary_operation = UnaryOperation(
-            unary_operation.op,
+            node.op,
             simplified_expr
         )
         if isinstance(simplified_expr, Number):
