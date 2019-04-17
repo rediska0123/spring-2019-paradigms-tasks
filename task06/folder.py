@@ -36,7 +36,7 @@ class ConstantFolder(ASTNodeVisitor):
         return node
 
     def visit_functionCall(self, node):
-        return FunctionCall(node.func_expr, simplify(node.args))
+        return FunctionCall(node.fun_expr, simplify(self, node.args))
 
     def visit_reference(self, node):
         return node

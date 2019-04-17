@@ -2,7 +2,7 @@ from model import *
 
 
 class PrettyPrinter(ASTNodeVisitor):
-    def __init__(self, depth, is_command):
+    def __init__(self, depth=0, is_command=True):
         self.tabs = '\t' * depth if is_command else ''
         self.end_with_semicolon = ';\n' if is_command else ''
         self.end = '\n' if is_command else ''
@@ -12,9 +12,10 @@ class PrettyPrinter(ASTNodeVisitor):
         return self.tabs + str(node.value) + self.end_with_semicolon
 
     def visit_functionDefinition(self, node):
-        program = self.tabs + 'def ' + node.name + '(' + \
-                  ', '.join(node.function.args) + ') {\n'
-        for command in node.function.body:
+        args = node.function.args
+        args = ', '.join(args) if args else ''
+        program = self.tabs + 'def ' + node.name + '(' + args + ') {\n'
+        for command in node.function.body or []:
             program += command.accept(PrettyPrinter(self.depth + 1, True))
         program += self.tabs + '}' + self.end
         return program
@@ -27,7 +28,7 @@ class PrettyPrinter(ASTNodeVisitor):
                           False
                       )
                   ) + ') {\n'
-        for if_true_command in node.if_true:
+        for if_true_command in node.if_true or []:
             program += if_true_command.accept(
                            PrettyPrinter(
                                self.depth + 1,
@@ -55,20 +56,18 @@ class PrettyPrinter(ASTNodeVisitor):
         return self.tabs + 'read ' + node.name + self.end_with_semicolon
 
     def visit_functionCall(self, node):
-        return self.tabs + \
-                node.fun_expr.accept(
-                    PrettyPrinter(
-                        self.depth,
-                        False
-                    )
-                ) + '(' + \
-                ', '.join([arg.accept(
+        args = ', '.join([arg.accept(
+            PrettyPrinter(
+                self.depth,
+                False
+            )
+        ) for arg in node.args]) if node.args else ''
+        return self.tabs + node.fun_expr.accept(
                                PrettyPrinter(
                                    self.depth,
                                    False
                                )
-                           ) for arg in node.args]) + \
-                ')' + self.end_with_semicolon
+                           ) + '(' + args + ')' + self.end_with_semicolon
 
     def visit_reference(self, node):
         return self.tabs + node.name + self.end_with_semicolon

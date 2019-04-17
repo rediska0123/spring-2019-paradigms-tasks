@@ -4,6 +4,12 @@ from model import *
 from folder import *
 
 
+def test_number():
+    program = Number(2)
+    result = program.accept(ConstantFolder())
+    assert result == Number(2)
+
+
 def test_binaryOperation_Number_Number():
     program = BinaryOperation(Number(2), '*', Number(4))
     result = program.accept(ConstantFolder())
