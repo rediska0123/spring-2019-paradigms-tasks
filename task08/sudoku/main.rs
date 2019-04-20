@@ -172,38 +172,36 @@ fn find_solution(f: &mut Field) -> Option<Field> {
 extern crate threadpool;
 use threadpool::ThreadPool;
 
-fn spawn_tasks(f: &mut Field, pool: &ThreadPool, sender: mpsc::Sender<Option<Field>>, depth: i32) {
-    let solved_cb = |f_solved: &mut Field| -> Field {
-        let sender = sender.clone();
-        sender.send(Some(f_solved.clone())).unwrap_or(());
-        f_solved.clone()
-    };
-
-    let next_step_cb = |f: &mut Field| -> Option<Field> {
+fn spawn_tasks(f: &mut Field, pool: &ThreadPool, sender: &mpsc::Sender<Option<Field>>, depth: i32) {
+    if depth == 1 {
         let sender = sender.clone();
         let mut f = f.clone();
-        if depth > 1 {
-            let sender = sender.clone();
-            spawn_tasks(&mut f, pool, sender, depth - 1);
-        } else {
-            pool.execute(move || {
-                sender.send(find_solution(&mut f)).unwrap_or(());
-            });
-        }
-        None
-    };
-
-    try_extend_field(f, solved_cb, next_step_cb);
+        pool.execute(move || {
+            sender.send(find_solution(&mut f)).unwrap_or(());
+        });
+    } else {
+        try_extend_field(
+            f,
+            |f_solved| {
+                sender.send(Some(f_solved.clone())).unwrap_or(());
+            },
+            |f| {
+                spawn_tasks(f, pool, sender, depth - 1);
+                None
+            },
+        );
+    }
 }
 
 const SPAWN_DEPTH: i32 = 1;
 
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (sender, receiver) = mpsc::channel();
-    let workers = 8;
-    let pool = ThreadPool::new(workers);
+    const WORKERS: usize = 8;
+    let pool = ThreadPool::new(WORKERS);
 
-    spawn_tasks(&mut f, &pool, sender, SPAWN_DEPTH);
+    spawn_tasks(&mut f, &pool, &sender, SPAWN_DEPTH);
+    std::mem::drop(sender);
 
     receiver.into_iter().find_map(|x| x)
 }
