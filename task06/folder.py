@@ -1,32 +1,26 @@
 from model import *
 
 
-def simplify(constantFolder, args):
-    return [arg.accept(constantFolder) for arg in args] if args else []
-
-
 class ConstantFolder(ASTNodeVisitor):
+    def simplify(self, args):
+        return [arg.accept(self) for arg in args] if args else []
 
     def visit_number(self, node):
         return node
 
     def visit_function(self, node):
-        args = node.args
-        body = node.body
-        return Function(args, simplify(self, body))
+        return Function(node.args, simplify(node.body))
 
-    def visit_functionDefinition(self, node):
-        name = node.name
-        function = node.function
-        return FunctionDefinition(name, function.accept(self))
+    def visit_function_definition(self, node):
+        return FunctionDefinition(node.name, node.function.accept(self))
 
     def visit_conditional(self, node):
         condition = node.condition
         if_true, if_false = node.if_true, node.if_false
         return Conditional(
             condition.accept(self),
-            simplify(self, if_true),
-            simplify(self, if_false)
+            simplify(if_true),
+            simplify(if_false)
         )
 
     def visit_print(self, node):
@@ -35,49 +29,47 @@ class ConstantFolder(ASTNodeVisitor):
     def visit_read(self, node):
         return node
 
-    def visit_functionCall(self, node):
-        return FunctionCall(node.fun_expr, simplify(self, node.args))
+    def visit_function_call(self, node):
+        return FunctionCall(node.fun_expr, simplify(node.args))
 
     def visit_reference(self, node):
         return node
 
-    def visit_binaryOperation(self, node):
-        lhs, rhs = node.lhs, node.rhs
-        simplified_lhs = lhs.accept(self)
-        simplified_rhs = rhs.accept(self)
+    def visit_binary_operation(self, node):
+        lhs = node.lhs.accept(self)
+        rhs = node.rhs.accept(self)
         simplified_binary_operation = BinaryOperation(
-            simplified_lhs,
+            lhs,
             node.op,
-            simplified_rhs
+            rhs
         )
-        if (isinstance(simplified_lhs, Number) and
-                isinstance(simplified_rhs, Number)):
+        if (isinstance(lhs, Number) and
+                isinstance(rhs, Number)):
             return simplified_binary_operation.evaluate(Scope())
-        elif (isinstance(simplified_lhs, Number) and
-                not bool(simplified_lhs) and
-                isinstance(simplified_rhs, Reference) and
+        elif (isinstance(lhs, Number) and
+                lhs == Number(0) and
+                isinstance(rhs, Reference) and
                 node.op == '*'):
             return Number(0)
-        elif (isinstance(simplified_rhs, Number) and
-                not bool(simplified_rhs) and
-                isinstance(simplified_lhs, Reference) and
+        elif (isinstance(rhs, Number) and
+                rhs == Number(0) and
+                isinstance(lhs, Reference) and
                 node.op == '*'):
             return Number(0)
-        elif (isinstance(simplified_lhs, Reference) and
-                isinstance(simplified_rhs, Reference) and
-                simplified_lhs.name == simplified_rhs.name and
+        elif (isinstance(lhs, Reference) and
+                isinstance(rhs, Reference) and
+                lhs.name == rhs.name and
                 node.op == '-'):
             return Number(0)
         return simplified_binary_operation
 
-    def visit_unaryOperation(self, node):
-        expr = node.expr
-        simplified_expr = expr.accept(self)
+    def visit_unary_operation(self, node):
+        expr = node.expr.accept(self)
         simplified_unary_operation = UnaryOperation(
             node.op,
-            simplified_expr
+            expr
         )
-        if isinstance(simplified_expr, Number):
+        if isinstance(expr, Number):
             return simplified_unary_operation.evaluate(Scope())
         return simplified_unary_operation
 

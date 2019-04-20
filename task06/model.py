@@ -35,7 +35,7 @@ class ASTNodeVisitor(metaclass=abc.ABCMeta):
     def visit_function(self, node):
         pass
 
-    def visit_functionDefinition(self, node):
+    def visit_function_definition(self, node):
         pass
 
     def visit_conditional(self, node):
@@ -47,16 +47,16 @@ class ASTNodeVisitor(metaclass=abc.ABCMeta):
     def visit_read(self, node):
         pass
 
-    def visit_functionCall(self, node):
+    def visit_function_call(self, node):
         pass
 
     def visit_reference(self, node):
         pass
 
-    def visit_binaryOperation(delf, node):
+    def visit_binary_operation(delf, node):
         pass
 
-    def visit_unaryOperation(delf, node):
+    def visit_unary_operation(delf, node):
         pass
 
 
@@ -105,7 +105,7 @@ class FunctionDefinition(ASTNode):
         self.function = function
 
     def accept(self, visitor):
-        return visitor.visit_functionDefinition(self)
+        return visitor.visit_function_definition(self)
 
     def evaluate(self, scope):
         scope[self.name] = self.function
@@ -166,7 +166,7 @@ class FunctionCall(ASTNode):
         self.args = args
 
     def accept(self, visitor):
-        return visitor.visit_functionCall(self)
+        return visitor.visit_function_call(self)
 
     def evaluate(self, scope):
         function = self.fun_expr.evaluate(scope)
@@ -219,7 +219,7 @@ class BinaryOperation(ASTNode):
         }
 
     def accept(self, visitor):
-        return visitor.visit_binaryOperation(self)
+        return visitor.visit_binary_operation(self)
 
     def evaluate(self, scope):
         lres = self.lhs.evaluate(scope).value
@@ -238,7 +238,7 @@ class UnaryOperation(ASTNode):
         }
 
     def accept(self, visitor):
-        return visitor.visit_unaryOperation(self)
+        return visitor.visit_unary_operation(self)
 
     def evaluate(self, scope):
         expr_res = self.expr.evaluate(scope).value

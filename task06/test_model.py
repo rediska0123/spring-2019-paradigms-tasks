@@ -39,7 +39,7 @@ def test_scope_keyerror():
         ch_ch_scope['d']
 
 
-def test_functionDefinition():
+def test_function_definition():
     definition = FunctionDefinition('add', Function(
         ['a', 'b'],
         [
@@ -132,7 +132,7 @@ def test_read(monkeypatch):
     assert Reference('a').evaluate(s) == Number(a)
 
 
-def test_functionCall():
+def test_function_call():
     definition = FunctionDefinition('gcd', Function(
         ['a', 'b'],
         [
@@ -154,7 +154,7 @@ def test_functionCall():
     assert call.evaluate(s) == Number(4)
 
 
-def test_functionCall_empty_body():
+def test_function_call_empty_body():
     definition = FunctionDefinition('empty_func', Function(
         ['a'],
         None
@@ -181,7 +181,7 @@ def test_reference():
     assert call.evaluate(s) == Number(a * b)
 
 
-def check_binaryOperation(a, op, b, res):
+def check_binary_operation(a, op, b, res):
     return BinaryOperation(
         Number(a),
         op,
@@ -189,25 +189,24 @@ def check_binaryOperation(a, op, b, res):
     ).evaluate(Scope()) == Number(res)
 
 
-def test_binaryOperation():
-    assert check_binaryOperation(1, '+', 2, 3)
-    assert check_binaryOperation(1, '-', 2, -1)
-    assert check_binaryOperation(2, '*', 2, 4)
-    assert check_binaryOperation(3, '/', 2, 1)
-    assert check_binaryOperation(3, '%', 2, 1)
-    assert check_binaryOperation(2, '==', 2, True)
-    assert check_binaryOperation(1, '!=', 2, True)
-    assert check_binaryOperation(1, '<', 2, True)
-    assert check_binaryOperation(1, '>', 2, False)
-    assert check_binaryOperation(1, '<=', 2, True)
-    assert check_binaryOperation(1, '>=', 2, False)
-    assert check_binaryOperation(2, '&&', 0, False)
-    print(Number(3 or 8).value)
-    assert (check_binaryOperation(3, '||', 8, 3) or
-            check_binaryOperation(3, '||', 8, 8))
+def test_binary_operation():
+    assert check_binary_operation(1, '+', 2, 3)
+    assert check_binary_operation(1, '-', 2, -1)
+    assert check_binary_operation(2, '*', 2, 4)
+    assert check_binary_operation(3, '/', 2, 1)
+    assert check_binary_operation(3, '%', 2, 1)
+    assert check_binary_operation(2, '==', 2, True)
+    assert check_binary_operation(1, '!=', 2, True)
+    assert check_binary_operation(1, '<', 2, True)
+    assert check_binary_operation(1, '>', 2, False)
+    assert check_binary_operation(1, '<=', 2, True)
+    assert check_binary_operation(1, '>=', 2, False)
+    assert check_binary_operation(2, '&&', 0, False)
+    assert (check_binary_operation(3, '||', 8, 3) or
+            check_binary_operation(3, '||', 8, 8))
 
 
-def test_unaryOperation():
+def test_unary_operation():
     s = Scope()
     assert UnaryOperation('-', Number(8)).evaluate(s) == Number(-8)
     assert UnaryOperation('!', Number(8)).evaluate(s) == Number(False)
