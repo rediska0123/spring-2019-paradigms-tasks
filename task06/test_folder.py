@@ -6,49 +6,43 @@ from folder import *
 
 def test_number():
     program = Number(2)
-    result = program.accept(ConstantFolder())
-    assert result == Number(2)
+    assert program.accept(ConstantFolder()) == Number(2)
 
 
-def test_binaryOperation_Number_Number():
+def test_binary_operation_number_number():
     program = BinaryOperation(Number(2), '*', Number(4))
-    result = program.accept(ConstantFolder())
-    assert result == Number(8)
+    assert program.accept(ConstantFolder()) == Number(8)
 
 
-def test_binaryOperation_Number_Reference():
+def test_binary_operation_number_reference():
     program = BinaryOperation(
-        BinaryOperation(Number(2), '-', Number(2)),
+        Number(0),
         '*',
         Reference('a')
     )
-    result = program.accept(ConstantFolder())
-    assert result == Number(0)
+    assert program.accept(ConstantFolder()) == Number(0)
 
 
-def test_binaryOperation_Reference_Number():
+def test_binary_operation_reference_number():
     program = BinaryOperation(
         Reference('a'),
         '*',
-        BinaryOperation(Number(2), '-', Number(2))
+        Number(0)
     )
-    result = program.accept(ConstantFolder())
-    assert result == Number(0)
+    assert program.accept(ConstantFolder()) == Number(0)
 
 
-def test_binaryOperation_Reference_Reference():
+def test_binary_operation_reference_reference():
     program = BinaryOperation(Reference('a'), '-', Reference('a'))
-    result = program.accept(ConstantFolder())
-    assert result == Number(0)
+    assert program.accept(ConstantFolder()) == Number(0)
 
 
-def test_unaryOperation_Number():
+def test_unary_operation_number():
     program = UnaryOperation('-', Number(-5))
-    result = program.accept(ConstantFolder())
-    assert result == Number(5)
+    assert program.accept(ConstantFolder()) == Number(5)
 
 
-def test_end_to_end1():
+def test_end_to_end_many_binary_operations():
     program = fold_constants(
         BinaryOperation(
             Number(10),
@@ -67,25 +61,10 @@ def test_end_to_end1():
             )
         )
     )
-    result = program.accept(ConstantFolder())
-    assert result == Number(13)
+    assert program.accept(ConstantFolder()) == Number(13)
 
 
-def test_end_to_end2():
-    program = fold_constants(
-        Print(
-            BinaryOperation(
-                UnaryOperation('-', Number(4)),
-                '+',
-                BinaryOperation(Reference('x'), '-', Reference('x'))
-            )
-        )
-    )
-    result = program.accept(ConstantFolder())
-    assert isinstance(result, Print) and result.expr == Number(-4)
-
-
-def test_end_to_end3():
+def test_end_to_end_gcd():
     definition = FunctionDefinition('gcd', Function(
         ['a', 'b'],
         [
@@ -100,12 +79,10 @@ def test_end_to_end3():
         ]
     ))
 
-    def_result = definition.accept(ConstantFolder())
-
-    assert isinstance(def_result, FunctionDefinition)
+    assert isinstance(definition.accept(ConstantFolder()), FunctionDefinition)
 
 
-def test_end_to_end4():
+def test_end_to_end_function_call():
     program = FunctionCall(Function(
         [],
         [BinaryOperation(
@@ -119,5 +96,5 @@ def test_end_to_end4():
             result.fun_expr.body[0].value == 2)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pytest.main()
