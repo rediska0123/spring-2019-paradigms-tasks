@@ -105,5 +105,19 @@ def test_end_to_end3():
     assert isinstance(def_result, FunctionDefinition)
 
 
+def test_end_to_end4():
+    program = FunctionCall(Function(
+        [],
+        [BinaryOperation(
+            Number(5),
+            '-',
+            Number(3)
+        )]
+    ), [])
+    result = program.accept(ConstantFolder())
+    assert (isinstance(result, FunctionCall) and
+            result.fun_expr.body[0].value == 2)
+
+
 if __name__ == "__main__":
     pytest.main()

@@ -6,35 +6,33 @@ class ConstantFolder(ASTNodeVisitor):
         return [arg.accept(self) for arg in args] if args else []
 
     def visit_number(self, node):
-        return node
+        return Number(node.value)
 
     def visit_function(self, node):
-        print(type(node.body))
         return Function(node.args, self.simplify(node.body))
 
     def visit_function_definition(self, node):
         return FunctionDefinition(node.name, node.function.accept(self))
 
     def visit_conditional(self, node):
-        condition = node.condition
-        if_true, if_false = node.if_true, node.if_false
         return Conditional(
-            condition.accept(self),
-            self.simplify(if_true),
-            self.simplify(if_false)
+            node.condition.accept(self),
+            self.simplify(node.if_true),
+            self.simplify(node.if_false)
         )
 
     def visit_print(self, node):
         return Print(node.expr.accept(self))
 
     def visit_read(self, node):
-        return node
+        return Read(node.name)
 
     def visit_function_call(self, node):
-        return FunctionCall(node.fun_expr, self.simplify(node.args))
+        return FunctionCall(node.fun_expr.accept(ConstantFolder()),
+                            self.simplify(node.args))
 
     def visit_reference(self, node):
-        return node
+        return Reference(node.name)
 
     def visit_binary_operation(self, node):
         lhs = node.lhs.accept(self)
