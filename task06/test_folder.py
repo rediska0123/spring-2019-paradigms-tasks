@@ -85,5 +85,25 @@ def test_end_to_end2():
     assert isinstance(result, Print) and result.expr == Number(-4)
 
 
+def test_end_to_end3():
+    definition = FunctionDefinition('gcd', Function(
+        ['a', 'b'],
+        [
+            Conditional(
+                BinaryOperation(Reference('b'), '==', Number(0)),
+                [Reference('a')],
+                [FunctionCall(Reference('gcd'), [
+                    Reference('b'),
+                    BinaryOperation(Reference('a'), '%', Reference('b'))
+                ])]
+            )
+        ]
+    ))
+
+    def_result = definition.accept(ConstantFolder())
+
+    assert isinstance(def_result, FunctionDefinition)
+
+
 if __name__ == "__main__":
     pytest.main()

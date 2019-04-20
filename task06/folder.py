@@ -9,7 +9,8 @@ class ConstantFolder(ASTNodeVisitor):
         return node
 
     def visit_function(self, node):
-        return Function(node.args, simplify(node.body))
+        print(type(node.body))
+        return Function(node.args, self.simplify(node.body))
 
     def visit_function_definition(self, node):
         return FunctionDefinition(node.name, node.function.accept(self))
@@ -19,8 +20,8 @@ class ConstantFolder(ASTNodeVisitor):
         if_true, if_false = node.if_true, node.if_false
         return Conditional(
             condition.accept(self),
-            simplify(if_true),
-            simplify(if_false)
+            self.simplify(if_true),
+            self.simplify(if_false)
         )
 
     def visit_print(self, node):
@@ -30,7 +31,7 @@ class ConstantFolder(ASTNodeVisitor):
         return node
 
     def visit_function_call(self, node):
-        return FunctionCall(node.fun_expr, simplify(node.args))
+        return FunctionCall(node.fun_expr, self.simplify(node.args))
 
     def visit_reference(self, node):
         return node
