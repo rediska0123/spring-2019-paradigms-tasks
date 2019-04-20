@@ -8,104 +8,85 @@ from textwrap import dedent
 def test_conditional():
     program = Conditional(Number(42), [], [])
     pretty_print_program = program.accept(PrettyPrinter(0, True))
-    answer = '''\
+    assert pretty_print_program == dedent('''\
         if (42) {
         }
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_conditional_empty():
     program = Conditional(Number(0), None, None)
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         if (0) {
         }
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_function_definition():
     program = FunctionDefinition("foo", Function([], []))
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         def foo() {
         }
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_function_call():
     program = FunctionCall(Reference('empty_func'), None)
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         empty_func();
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_print():
     program = Print(Number(42))
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         print 42;
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_read():
     program = Read('x')
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         read x;
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_number():
     program = Number(10)
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         10;
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_reference():
     program = Reference('x')
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         x;
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_binary_operation():
     add = BinaryOperation(Number(2), '+', Number(3))
     mul = BinaryOperation(Number(1), '*', add)
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = mul.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = mul.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         (1) * ((2) + (3));
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_unary_operation():
     program = UnaryOperation('-', Number(42))
-    prettyPrinter = PrettyPrinter(0, True)
-    pretty_print_program = program.accept(prettyPrinter)
-    answer = '''\
+    pretty_print_program = program.accept(PrettyPrinter(0, True))
+    assert pretty_print_program == dedent('''\
         -(42);
-    '''
-    assert pretty_print_program == dedent(answer)
+    ''')
 
 
 def test_end_to_end(capsys):
@@ -125,7 +106,7 @@ def test_end_to_end(capsys):
         ),
     ])))
     out, err = capsys.readouterr()
-    answer = '''\
+    assert out == dedent('''\
         def main(arg1) {
             read x;
             print x;
@@ -136,8 +117,7 @@ def test_end_to_end(capsys):
                 exit(-(arg1));
             }
         }
-    '''
-    assert out == dedent(answer)
+    ''')
 
 
 if __name__ == '__main__':
