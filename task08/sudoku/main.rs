@@ -173,7 +173,7 @@ extern crate threadpool;
 use threadpool::ThreadPool;
 
 fn spawn_tasks(f: &mut Field, pool: &ThreadPool, sender: &mpsc::Sender<Option<Field>>, depth: i32) {
-    if depth == 1 {
+    if depth == 0 {
         let sender = sender.clone();
         let mut f = f.clone();
         pool.execute(move || {
@@ -182,8 +182,8 @@ fn spawn_tasks(f: &mut Field, pool: &ThreadPool, sender: &mpsc::Sender<Option<Fi
     } else {
         try_extend_field(
             f,
-            |f_solved| {
-                sender.send(Some(f_solved.clone())).unwrap_or(());
+            |f| {
+                sender.send(Some(f.clone())).unwrap_or(());
             },
             |f| {
                 spawn_tasks(f, pool, sender, depth - 1);
@@ -193,7 +193,7 @@ fn spawn_tasks(f: &mut Field, pool: &ThreadPool, sender: &mpsc::Sender<Option<Fi
     }
 }
 
-const SPAWN_DEPTH: i32 = 1;
+const SPAWN_DEPTH: i32 = 2;
 
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (sender, receiver) = mpsc::channel();
