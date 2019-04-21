@@ -2,8 +2,8 @@ from model import *
 
 
 class ConstantFolder(ASTNodeVisitor):
-    def visit_list(self, statements):
-        return [statement.accept(self) for statement in statements or []]
+    def visit_list(self, nodes):
+        return [node.accept(self) for node in nodes or []]
 
     def visit_number(self, node):
         return Number(node.value)
@@ -37,11 +37,7 @@ class ConstantFolder(ASTNodeVisitor):
     def visit_binary_operation(self, node):
         lhs = node.lhs.accept(self)
         rhs = node.rhs.accept(self)
-        folded_node = BinaryOperation(
-            lhs,
-            node.op,
-            rhs
-        )
+        folded_node = BinaryOperation(lhs, node.op, rhs)
         if (isinstance(lhs, Number) and isinstance(rhs, Number)):
             return folded_node.evaluate(Scope())
         elif (node.op == '*' and
