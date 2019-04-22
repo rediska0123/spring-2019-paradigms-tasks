@@ -57,10 +57,7 @@ class ConstantFolder(ASTNodeVisitor):
 
     def visit_unary_operation(self, node):
         expr = node.expr.accept(self)
-        folded_node = UnaryOperation(
-            node.op,
-            expr
-        )
+        folded_node = UnaryOperation(node.op, expr)
         if isinstance(expr, Number):
             return folded_node.evaluate(Scope())
         return folded_node

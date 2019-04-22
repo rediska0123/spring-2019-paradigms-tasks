@@ -6,9 +6,9 @@ def print_expr(expr):
 
 
 class PrettyPrinter(ASTNodeVisitor):
-    def print_statements(self, statements):
+    def visit_block(self, block):
         program = '{\n'
-        for statement in statements:
+        for statement in block:
             program += statement.accept(
                            PrettyPrinter(self.depth + 1, is_statement=True))
         program += self.indent + '}'
@@ -33,14 +33,14 @@ class PrettyPrinter(ASTNodeVisitor):
     def visit_function_definition(self, node):
         args = ', '.join(node.function.args)
         program = self.indent + 'def ' + node.name + '(' + args + ') '
-        program += self.print_statements(node.function.body)
+        program += self.visit_block(node.function.body)
         return self.terminate(program)
 
     def visit_conditional(self, node):
-        program = (self.indent + 'if (' + print_expr(node.condition) + ') ')
-        program += self.print_statements(node.if_true or [])
+        program = self.indent + 'if (' + print_expr(node.condition) + ') '
+        program += self.visit_block(node.if_true or [])
         if node.if_false:
-            program += (' else ' + self.print_statements(node.if_false))
+            program += ' else ' + self.visit_block(node.if_false)
         return self.terminate(program)
 
     def visit_print(self, node):
@@ -51,15 +51,17 @@ class PrettyPrinter(ASTNodeVisitor):
 
     def visit_function_call(self, node):
         args = ', '.join(map(print_expr, node.args or []))
-        return (self.terminate(self.indent + print_expr(node.fun_expr) +
-                '(' + args + ')'))
+        return self.terminate(self.indent + print_expr(node.fun_expr) +
+                              '(' + args + ')')
 
     def visit_reference(self, node):
         return self.terminate(self.indent + node.name)
 
     def visit_binary_operation(self, node):
-        return (self.terminate(self.indent + '(' + print_expr(node.lhs) +
-                ') ' + node.op + ' (' + print_expr(node.rhs) + ')'))
+        return (self.terminate(self.indent + '(' +
+                print_expr(node.lhs) +
+                ') ' + node.op + ' (' +
+                print_expr(node.rhs) + ')'))
 
     def visit_unary_operation(self, node):
         return (self.terminate(self.indent + node.op + '(' +
