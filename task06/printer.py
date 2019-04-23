@@ -57,10 +57,9 @@ class PrettyPrinter(ASTNodeVisitor):
         return self.wrap(node.name)
 
     def visit_binary_operation(self, node):
-        return self.wrap('(' +
-                         print_expr(node.lhs) +
-                         ') ' + node.op + ' (' +
-                         print_expr(node.rhs) + ')')
+        return self.wrap('(' + print_expr(node.lhs) + ')' +
+                         ' ' + node.op + ' ' +
+                         '(' + print_expr(node.rhs) + ')')
 
     def visit_unary_operation(self, node):
         return self.wrap(node.op + '(' + print_expr(node.expr) + ')')
