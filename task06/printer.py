@@ -39,7 +39,8 @@ class PrettyPrinter(ASTNodeVisitor):
         program = ('if (' + print_expr(node.condition) + ') ' +
                    self.visit_block(node.if_true))
         if node.if_false:
-            program = program[:-1] + ' else ' + self.visit_block(node.if_false)
+            program = (program.rstrip('\n') + ' else ' +
+                       self.visit_block(node.if_false))
         return self.wrap(program)
 
     def visit_print(self, node):
