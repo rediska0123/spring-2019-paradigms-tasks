@@ -27,6 +27,7 @@ TEST_CASE("Queue pushes and pops") {
     CHECK(!queue_empty(&q));
     CHECK(queue_pop(&q) == &c);
     CHECK(queue_empty(&q));
+    malloc(10);
 
     queue_destroy(&q);
 }
