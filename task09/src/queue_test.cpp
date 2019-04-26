@@ -27,9 +27,7 @@ TEST_CASE("Queue pushes and pops") {
     CHECK(!queue_empty(&q));
     CHECK(queue_pop(&q) == &c);
     CHECK(queue_empty(&q));
-    static char *x = (char *)malloc(10) + 5;
-    x[0] = 'x';
-
+    
     queue_destroy(&q);
 }
 
