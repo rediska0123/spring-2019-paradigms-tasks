@@ -27,7 +27,7 @@ TEST_CASE("Queue pushes and pops") {
     CHECK(!queue_empty(&q));
     CHECK(queue_pop(&q) == &c);
     CHECK(queue_empty(&q));
-    
+
     queue_destroy(&q);
 }
 
